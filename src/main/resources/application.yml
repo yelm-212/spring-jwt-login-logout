@@ -1,0 +1,41 @@
+mybatis:
+  type-aliases-package: com.yelm.jwtlogin.user.entity,com.yelm.jwtlogin.user.vo
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    call-setters-on-nulls: true
+    jdbc-type-for-null: "NULL"
+
+spring:
+  application:
+    name: "jwtlogin"
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/jwtlogin?currentSchema=public
+    username: user
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+# JWT Secret Key & Expire time
+  jwt:
+    secret: jwtloginExampleqpeorijdkfkdafjaldkfjadkfjadkjfeqradkfjadkfjapt
+    # Expires in 6hr
+    expirems : "21600000"
+
+server:
+  port: 8080
+
+
+# Spring Security Logging Option
+logging:
+  level:
+    org:
+      springframework:
+        security: TRACE
+    root: debug
+
+# CORS 주소 (FE 주소)
+cors:
+  allowed-origins: "http://localhost:8081"
