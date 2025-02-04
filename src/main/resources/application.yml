@@ -17,12 +17,19 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  # Redis config
+  data:
+    redis:
+      host: localhost
+      port: 6677
 
-# JWT Secret Key & Expire time
+  # JWT Secret Key & Expire time
   jwt:
     secret: jwtloginExampleqpeorijdkfkdafjaldkfjadkfjadkjfeqradkfjadkfjapt
-    # Expires in 6hr
-    expirems : "21600000"
+    # Refresh Expires in 24hr
+    refreshexpirems : 86400000
+    # Access Expires in 30 min
+    accessexprirems : 1800000
 
 server:
   port: 8080
