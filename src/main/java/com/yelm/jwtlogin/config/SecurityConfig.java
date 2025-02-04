@@ -92,7 +92,9 @@ public class SecurityConfig {
 
         http
                 .addFilterAt(
-                        new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil , objectMapper),
+                        new LoginFilter(authenticationManager(authenticationConfiguration),
+                                jwtUtil,
+                                objectMapper),
                         UsernamePasswordAuthenticationFilter.class);
 
         // Session

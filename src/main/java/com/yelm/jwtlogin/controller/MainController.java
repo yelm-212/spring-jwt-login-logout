@@ -1,9 +1,11 @@
 package com.yelm.jwtlogin.controller;
 
+import com.yelm.jwtlogin.user.entity.CustomUserDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,15 +26,12 @@ public class MainController {
     }
 
     @GetMapping("/hello")
-    public ResponseEntity helloP() {
+    public ResponseEntity helloP(@AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        SecurityContextHolder.getContext().getAuthentication().getAuthorities()
-                .iterator().next().getAuthority();
-        log.debug("Username : {}", username);
-        log.debug("Role : {}", SecurityContextHolder.getContext().getAuthentication().getAuthorities()
-                .iterator().next().getAuthority());
 
-        return ResponseEntity.ok("Hello " + username);
+        log.debug("Username : {}", userDetails.getUsername());
+        log.debug("Role : {}", userDetails.getRole());
+
+        return ResponseEntity.ok("Hello " + userDetails.getUsername());
     }
 }

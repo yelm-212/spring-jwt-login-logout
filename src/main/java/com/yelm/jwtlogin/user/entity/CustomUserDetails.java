@@ -57,7 +57,4 @@ public class CustomUserDetails implements UserDetails {
         return userEntity.getRole();
     }
 
-    public boolean hasRole(String role) {
-        return userEntity.getRole().equals(role);
-    }
 }
