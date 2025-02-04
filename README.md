@@ -25,17 +25,17 @@ erDiagram
 
 ```mermaid
 graph TD
-    A[Client] -->|1. POST /login| B[LoginFilter]
-    B -->|2. Authentication| C[AuthenticationManager]
-    C -->|3. UserDetails Load| D[CustomUserDetailsService]
-    D -->|4. Query User| E[(PostgreSQL)]
-    E -->|5. User Data| D
-    D -->|6. UserDetails| C
-    C -->|7. Validate| B
-    B -->|8. JWT Token| A
+    A[Client] -->|POST /login| B[LoginFilter]
+    B -->|Authentication| C[AuthenticationManager]
+    C -->|UserDetails Load| D[CustomUserDetailsService]
+    D -->|Query User| E[(PostgreSQL)]
+    E -->|User Data| D
+    D -->|UserDetails| C
+    C -->|Validate| B
+    B -->|JWT Token| A
 
-    A -->|9. Protected API| F[JWTFilter]
-    F -->|10. Validate Token| G[Protected Resource]
+    A -->|Protected API| F[JWTFilter]
+    F -->|Validate Token| G[Protected Resource]
 ```
 
 ## Authentication Flow
