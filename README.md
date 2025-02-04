@@ -66,7 +66,7 @@ spring:
 ### CORS Configuration
 ```yaml
 cors:
-  allowed-origins: "http://localhost:8081"
+  allowed-origins: your_client_url
 ```
 
 ## TODO
