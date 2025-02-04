@@ -73,6 +73,7 @@ cors:
 
 - [ ] Verify CORS configuration with Frontend (Vue.js)
 - [ ] Implement token refresh mechanism
+- [ ] Implement logout mechanism
 
 ## API Endpoints
 
