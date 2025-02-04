@@ -30,7 +30,7 @@ public class JWTFilter extends OncePerRequestFilter {
         // Authorization Header
         if ( authorization == null || !authorization.startsWith("Bearer ")) {
 
-            log.debug("token null");
+            log.debug("Invalid Authorization header");
             filterChain.doFilter(request, response);
 
             return;
@@ -41,7 +41,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         if (jwtUtil.isExpired(token)) {
 
-            log.debug("token expired");
+            log.debug("Token expired");
             filterChain.doFilter(request, response);
 
             return;
