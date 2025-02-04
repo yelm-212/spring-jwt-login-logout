@@ -14,36 +14,53 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 @Slf4j
 @AllArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        // Find Authorization Header
-        String authorization= request.getHeader("Authorization");
-
-        // Authorization Header
-        if ( authorization == null || !authorization.startsWith("Bearer ")) {
-
-            log.debug("Invalid Authorization header");
+        // Skip this filter when reissue
+        if (request.getRequestURI().equals("/reissue")) {
             filterChain.doFilter(request, response);
-
             return;
         }
 
-        log.debug("authorization now");
+        PrintWriter writer = response.getWriter();
+
+        // Find Authorization Header - Access Token -
+        String authorization= request.getHeader("Authorization");
+
+        // if AccessToken doesn't exist, go to next filter
+        if (authorization == null){
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Check Authorization Header
+        if (!authorization.startsWith("Bearer ")) {
+            writer.print("Invalid Authorization header");
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        log.debug("Access token authorization started");
         String token = authorization.split(" ")[1];
 
         if (jwtUtil.isExpired(token)) {
+            writer.print("Access Token expired");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
 
-            log.debug("Token expired");
-            filterChain.doFilter(request, response);
-
+        // Check if this token is Access token
+        if (!jwtUtil.getCategory(token).equals("access")) {
+            writer.print("Invalid token category");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
@@ -63,7 +80,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
         // Auth
         Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);

@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yelm.jwtlogin.user.entity.CustomUserDetails;
 import com.yelm.jwtlogin.user.vo.LoginRequestDTO;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -64,9 +66,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String role = auth.getAuthority();
 
-        String token = jwtUtil.createJwt(username, role);
+        String accessTok = jwtUtil.createJwt("access", username, role);
+        String refreshTok = jwtUtil.createJwt("refresh", username, role);
 
-        response.addHeader("Authorization", "Bearer " + token);
+        // Access tokens set as bearer tok
+        response.addHeader("Authorization", "Bearer " + accessTok);
+        // Refresh tokens set as cookie and will be used for access token reissue
+        response.addCookie(createCookie("refresh", refreshTok));
+        response.setStatus(HttpStatus.OK.value());
     }
 
     // Login Failure
@@ -81,5 +88,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         errorResponse.put("message", failed.getMessage());
 
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+    }
+
+    private Cookie createCookie(String key, String value) {
+
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(24*60*60);
+        cookie.setHttpOnly(true);
+
+        return cookie;
     }
 }

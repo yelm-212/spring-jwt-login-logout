@@ -13,14 +13,17 @@ import java.util.Date;
 public class JWTUtil {
 
     private SecretKey secretKey;
-    private Long expireMs;
+    private Long accessExpireMs;
+    private Long refreshExpireMs;
 
     public JWTUtil(@Value("${spring.jwt.secret}")String secret,
-                   @Value("${spring.jwt.expirems}")String expires) {
+                   @Value("${spring.jwt.refreshexpirems}")String refreshExpireMs,
+                   @Value("${spring.jwt.accessexprirems}")String accessExpireMs) {
 
 
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
-        expireMs = Long.valueOf(expires);
+        this.accessExpireMs = Long.valueOf(accessExpireMs);
+        this.refreshExpireMs = Long.valueOf(refreshExpireMs);
     }
 
     public String getUsername(String token) {
@@ -38,15 +41,37 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    // TODO: Customize expire time
-    public String createJwt(String username, String role) {
+    public String getCategory(String token) {
+    /* Get JWT category - `refresh` / `access` */
 
-        return Jwts.builder()
-                .claim("username", username)
-                .claim("role", role)
-                .issuedAt(new Date())
-                .expiration(new Date(new Date().getTime() + expireMs) )
-                .signWith(secretKey)
-                .compact();
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category", String.class);
+    }
+
+    public String createJwt(String category, String username, String role) {
+    /* Creates JWT token     */
+
+        switch (category){
+            case "refresh":
+                return Jwts.builder()
+                        .claim("category", category)
+                        .claim("username", username)
+                        .claim("role", role)
+                        .issuedAt(new Date())
+                        .expiration(new Date(new Date().getTime() + refreshExpireMs) )
+                        .signWith(secretKey)
+                        .compact();
+            case "access":
+                return Jwts.builder()
+                        .claim("category", category)
+                        .claim("username", username)
+                        .claim("role", role)
+                        .issuedAt(new Date())
+                        .expiration(new Date(new Date().getTime() + accessExpireMs) )
+                        .signWith(secretKey)
+                        .compact();
+            default:
+                throw new IllegalArgumentException("Invalid token category");
+        }
+
     }
 }
