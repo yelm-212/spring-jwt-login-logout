@@ -48,4 +48,4 @@ logging:
 
 # CORS 주소 (FE 주소)
 cors:
-  allowed-origins: "http://localhost:8081"
+  allowed-origins: "http://localhost:8888"
