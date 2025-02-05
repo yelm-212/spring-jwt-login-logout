@@ -26,29 +26,36 @@ erDiagram
 
 ```mermaid
 graph TD
-    A[Client] -->|POST /login| B[LoginFilter]
-    B -->|Authentication| C[AuthenticationManager]
-    C -->|UserDetails Load| D[CustomUserDetailsService]
-    D -->|Query User| E[(PostgreSQL)]
-    E -->|User Data| D
-    D -->|UserDetails| C
-    C -->|Validate| B
-    B -->|Generate Tokens| A{Client}
+   A[Client] -->|POST /login| B[LoginFilter]
+   B -->|Authentication| C[AuthenticationManager]
+   C -->|UserDetails Load| D[CustomUserDetailsService]
+   D -->|Query User| E[(PostgreSQL)]
+   E -->|User Data| D
+   D -->|UserDetails| C
+   C -->|Validate| B
+   B -->|Generate Tokens| A{Client}
+```
 
-    A -->|Set Access Token as Auth Header| T1[Access Token Stored]
-    A -->|Set Refresh Token as HttpOnly Cookie| T2[Refresh Token Stored]
+```mermaid
+graph TD
+   A[Client]
 
-    A -->|Protected API Request| F[JWTFilter]
-    F -->|Validate Access Token| G[Protected Resource]
+   A -->|Set Access Token as Auth Header| T1[Access Token Stored]
+   A -->|Set Refresh Token as HttpOnly Cookie| T2[Refresh Token Stored]
 
-    A -->|Access Token Expired| H[Reissue Request]
-    H -->|Send Refresh Token as Cookie| I[TokenReissueFilter]
-    I -->|Issue New Tokens| A
-%%    J -->|Check Blacklist| I
-    I -->|Validate Refresh Token| J[(Redis)]
+   A -->|Access Token Expired| H[Reissue Request]
+   H -->|Send Refresh Token as Cookie| A
 
-    A -->|Logout Request| K[Logout Request]
-    K -->|Add Current Access Token as Blacklist| J
+   K -->|Add Current Access Token to Blacklist| J
+   A -->|Logout Request| K[Logout Request]
+
+   A -->|Protected API Request| F[JWTFilter]
+   F -->|Check Blacklist| J[(Redis)]
+   J -->|Returns Blacklisted token| F
+   F -->|Allow or Deny| G[Protected Resource]
+
+
+
 
 ```
 
@@ -69,9 +76,8 @@ graph TD
     - If the Refresh Token is valid:
         - A new Access Token is issued.
         - A new Refresh Token is issued and stored.
-9. TODOs
-    - If the Refresh Token is invalid or blacklisted:
-        - The user is required to log in again.
+9. If the Refresh Token is invalid or blacklisted:
+   - The user is required to log in again.
 
 
 ## Implemented Filters
@@ -138,17 +144,20 @@ spring:
 
 - [ ] Verify CORS configuration with Frontend (Vue.js)
 - [x] Implement token refresh mechanism
-- [ ] Implement logout mechanism
+- [x] Implement logout mechanism
+
+## API Endpoints
 
 ## API Endpoints
 
 ### Authentication
-- POST `/login`: Authentication endpoint (Accepts JSON payload)
-- POST `/join`: User registration (JSON payload)
+- **POST** `/login`: Authentication endpoint (Accepts JSON payload)
+- **POST** `/join`: User registration (JSON payload)
+- **POST** `/logout`: Logs out the user (Requires Access Token in Authorization Header)
 
 ### Protected Endpoints
-- GET `/hello`: General user endpoint (Requires JWT Access Token)
-- GET `/admin`: Admin only endpoint (Requires Access Token with ROLE_ADMIN)
+- **GET** `/hello`: General user endpoint (Requires JWT Access Token)
+- **GET** `/admin`: Admin only endpoint (Requires Access Token with ROLE_ADMIN)
 
 ### Token Management
-- POST `/reissue`: Token rotation (Accepts Refresh Token, Access Token is optional)
+- **POST** `/reissue`: Token rotation (Accepts Refresh Token, Access Token is optional)
