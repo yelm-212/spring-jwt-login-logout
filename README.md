@@ -140,6 +140,13 @@ spring:
       port: 6677
 ```
 
+To check the blacklist directly in Redis, you can use the following command:
+
+```redis
+SCAN 0 MATCH blacklist:* COUNT 100
+```
+This command iterates through keys matching the pattern blacklist:*, retrieving up to 100 keys per iteration. Adjust the COUNT value as needed for performance optimization.
+
 ## TODO
 
 - [ ] Verify CORS configuration with Frontend (Vue.js)
