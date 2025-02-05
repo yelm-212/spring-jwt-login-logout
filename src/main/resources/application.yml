@@ -42,6 +42,9 @@ logging:
       springframework:
         security: TRACE
     root: debug
+    sun.rmi.loader: WARN
+    sun.rmi.transport.tcp: warn
+    javax.management.remote.rmi: WARN
 
 # CORS 주소 (FE 주소)
 cors:
