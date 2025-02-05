@@ -1,5 +1,6 @@
 package com.yelm.jwtlogin.jwt;
 
+import com.yelm.jwtlogin.blacklist.TokenBlacklistService;
 import com.yelm.jwtlogin.user.entity.CustomUserDetails;
 import com.yelm.jwtlogin.user.entity.UserEntity;
 import jakarta.servlet.FilterChain;
@@ -21,6 +22,8 @@ import java.io.PrintWriter;
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
+    private final TokenBlacklistService blacklistService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
@@ -49,6 +52,13 @@ public class JWTFilter extends OncePerRequestFilter {
 
         log.debug("Access token authorization started");
         String token = authorization.split(" ")[1];
+
+        if (blacklistService.isTokenBlacklisted(token)) {
+            PrintWriter writer = response.getWriter();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            writer.print("Token is blacklisted, please log in again");
+            return;
+        }
 
         if (jwtUtil.isExpired(token)) {
             PrintWriter writer = response.getWriter();

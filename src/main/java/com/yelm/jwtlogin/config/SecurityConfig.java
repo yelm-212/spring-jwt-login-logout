@@ -1,9 +1,8 @@
 package com.yelm.jwtlogin.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yelm.jwtlogin.jwt.JWTFilter;
-import com.yelm.jwtlogin.jwt.JWTUtil;
-import com.yelm.jwtlogin.jwt.LoginFilter;
+import com.yelm.jwtlogin.blacklist.TokenBlacklistService;
+import com.yelm.jwtlogin.jwt.*;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +39,8 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
 
     private final JWTUtil jwtUtil;
+
+    private final TokenBlacklistService blacklistService;
 
     @Autowired
     private final ObjectMapper objectMapper;
@@ -88,7 +89,7 @@ public class SecurityConfig {
 
         // JWT filter
         http
-                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
+                .addFilterBefore(new JWTFilter(jwtUtil, blacklistService), LoginFilter.class);
 
         http
                 .addFilterAt(
@@ -96,6 +97,14 @@ public class SecurityConfig {
                                 jwtUtil,
                                 objectMapper),
                         UsernamePasswordAuthenticationFilter.class);
+
+        // Logout
+        http
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .addLogoutHandler(new JwtLogoutHandler(blacklistService))
+                        .logoutSuccessHandler(new JwtLogoutSuccessHandler())
+                );
 
         // Session
         http
