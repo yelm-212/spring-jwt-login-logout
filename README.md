@@ -3,7 +3,6 @@
 ## Dependencies
 
 - Spring Security
-- Spring JPA
 - [Mybatis Spring Boot Starter](https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter)
 - Lombok
 - [JJWT (0.12.3)](https://github.com/jwtk/jjwt)
