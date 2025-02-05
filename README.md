@@ -72,15 +72,18 @@ cors:
 ## TODO
 
 - [ ] Verify CORS configuration with Frontend (Vue.js)
-- [ ] Implement token refresh mechanism
+- [x] Implement token refresh mechanism
 - [ ] Implement logout mechanism
 
 ## API Endpoints
 
 ### Authentication
-- POST `/login`: Authentication endpoint (Accept JSON payload)
+- POST `/login`: Authentication endpoint (Accepts JSON payload)
 - POST `/join`: User registration (JSON payload)
 
 ### Protected Endpoints
-- GET `/hello`: General user endpoint (Requires JWT token)
-- GET `/admin`: Admin only endpoint (Requires ROLE_ADMIN)
+- GET `/hello`: General user endpoint (Requires JWT Access Token)
+- GET `/admin`: Admin only endpoint (Requires Access Token with ROLE_ADMIN)
+
+### Token Management
+- POST `/reissue`: Token rotation (Accepts Refresh Token, Access Token is optional)
