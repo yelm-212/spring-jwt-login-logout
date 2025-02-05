@@ -1,4 +1,4 @@
-# Spring Security + JWT Login
+# Spring Security + JWT Login & Logout
 
 ## Dependencies
 
