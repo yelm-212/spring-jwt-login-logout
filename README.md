@@ -10,6 +10,10 @@
 - PostgreSQL
 - Redis
 
+## Client Testing
+
+You can test this backend implementation with a Vue.js client application available at https://github.com/yelm-212/jwt-login-client.
+
 ## Database Schema
 
 ```mermaid
@@ -149,11 +153,9 @@ This command iterates through keys matching the pattern blacklist:*, retrieving 
 
 ## TODO
 
-- [ ] Verify CORS configuration with Frontend (Vue.js)
+- [x] Verify CORS configuration with Frontend (Vue.js)
 - [x] Implement token refresh mechanism
 - [x] Implement logout mechanism
-
-## API Endpoints
 
 ## API Endpoints
 
@@ -168,3 +170,4 @@ This command iterates through keys matching the pattern blacklist:*, retrieving 
 
 ### Token Management
 - **POST** `/reissue`: Token rotation (Accepts Refresh Token, Access Token is optional)
+
