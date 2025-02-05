@@ -42,9 +42,12 @@ graph TD
 
     A -->|Access Token Expired| H[Reissue Request]
     H -->|Send Refresh Token as Cookie| I[TokenReissueFilter]
-%%    I -->|Validate Refresh Token| J[(Redis)]
+    I -->|Issue New Tokens| A
 %%    J -->|Check Blacklist| I
-%%    I -->|Issue New Tokens| A
+    I -->|Validate Refresh Token| J[(Redis)]
+
+    A -->|Logout Request| K[Logout Request]
+    K -->|Add Current Access Token as Blacklist| J
 
 ```
 
