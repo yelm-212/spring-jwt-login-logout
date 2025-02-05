@@ -8,6 +8,7 @@
 - Lombok
 - [JJWT (0.12.3)](https://github.com/jwtk/jjwt)
 - PostgreSQL
+- Redis
 
 ## Database Schema
 
