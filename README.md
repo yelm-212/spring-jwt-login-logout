@@ -75,7 +75,7 @@ graph TD
 7. `JWTFilter` validates the Access Token for protected endpoints.
 8. If the Access Token is expired or client sends reissue request:
     - The client sends a reissue request with the Refresh Token (HttpOnly Cookie).
-    - `TokenReissueFilter` validates the Refresh Token using Redis.
+    - `TokenBlacklistService` validates the Refresh Token using Redis.
     - If the Refresh Token is valid:
         - A new Access Token is issued.
         - A new Refresh Token is issued and stored.
