@@ -30,8 +30,6 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        PrintWriter writer = response.getWriter();
-
         // Find Authorization Header - Access Token -
         String authorization= request.getHeader("Authorization");
 
@@ -43,6 +41,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         // Check Authorization Header
         if (!authorization.startsWith("Bearer ")) {
+            PrintWriter writer = response.getWriter();
             writer.print("Invalid Authorization header");
             filterChain.doFilter(request, response);
             return;
@@ -52,6 +51,7 @@ public class JWTFilter extends OncePerRequestFilter {
         String token = authorization.split(" ")[1];
 
         if (jwtUtil.isExpired(token)) {
+            PrintWriter writer = response.getWriter();
             writer.print("Access Token expired");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
@@ -59,6 +59,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         // Check if this token is Access token
         if (!jwtUtil.getCategory(token).equals("access")) {
+            PrintWriter writer = response.getWriter();
             writer.print("Invalid token category");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
