@@ -3,14 +3,14 @@ package com.yelm.jwtlogin.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yelm.jwtlogin.blacklist.TokenBlacklistService;
 import com.yelm.jwtlogin.jwt.*;
-import lombok.AllArgsConstructor;
+import com.yelm.jwtlogin.user.service.CustomUserDetailsSerivce;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -35,14 +35,13 @@ public class SecurityConfig {
     @Value("${cors.allowed-origins}")
     private String allowedOrigins;
 
-    // authenticationManager() paramerter
-    private final AuthenticationConfiguration authenticationConfiguration;
-
     private final JWTUtil jwtUtil;
+
+    private final CustomUserDetailsSerivce userDetailsService;  // 이 부분 추가
+
 
     private final TokenBlacklistService blacklistService;
 
-    @Autowired
     private final ObjectMapper objectMapper;
 
     @Bean
@@ -54,10 +53,14 @@ public class SecurityConfig {
         return new DelegatingPasswordEncoder("sha256", encoders);
     }
 
-    // Add AuthenticationManager as `@Bean`
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
+    public CustomAuthenticationProvider customAuthenticationProvider() {
+        return new CustomAuthenticationProvider(userDetailsService, passwordEncoder());
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager() {
+        return new ProviderManager(customAuthenticationProvider());
     }
 
     @Bean
@@ -93,7 +96,7 @@ public class SecurityConfig {
 
         http
                 .addFilterAt(
-                        new LoginFilter(authenticationManager(authenticationConfiguration),
+                        new LoginFilter(authenticationManager(),
                                 jwtUtil,
                                 objectMapper),
                         UsernamePasswordAuthenticationFilter.class);

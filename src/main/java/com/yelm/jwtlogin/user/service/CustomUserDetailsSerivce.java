@@ -5,7 +5,6 @@ import com.yelm.jwtlogin.user.entity.UserEntity;
 import com.yelm.jwtlogin.user.mapper.UserMapper;
 import com.yelm.jwtlogin.user.vo.UserResponseVO;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,7 @@ public class CustomUserDetailsSerivce implements UserDetailsService {
     private final UserMapper userMapper;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public CustomUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserResponseVO userVO = userMapper.selectUserByUsername(username);
 
         if (userVO == null) {
