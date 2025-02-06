@@ -46,7 +46,7 @@ graph TD
    A -->|Set Access Token as Auth Header| T1[Access Token Stored]
    A -->|Set Refresh Token as HttpOnly Cookie| T2[Refresh Token Stored]
 
-   A -->|Access Token Expired| H[Reissue Request]
+   A -->|Reissue Request with Refresh Token| H[Reissue Request]
    H -->|Send Refresh Token as Cookie| A
 
    K -->|Add Current Access Token to Blacklist| J
