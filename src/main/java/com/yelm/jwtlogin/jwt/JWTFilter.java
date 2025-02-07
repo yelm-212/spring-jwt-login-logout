@@ -3,6 +3,7 @@ package com.yelm.jwtlogin.jwt;
 import com.yelm.jwtlogin.blacklist.TokenBlacklistService;
 import com.yelm.jwtlogin.user.entity.CustomUserDetails;
 import com.yelm.jwtlogin.user.entity.UserEntity;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -53,46 +54,53 @@ public class JWTFilter extends OncePerRequestFilter {
         log.debug("Access token authorization started");
         String token = authorization.split(" ")[1];
 
-        if (blacklistService.isTokenBlacklisted(token)) {
-            PrintWriter writer = response.getWriter();
+        try {
+            if (blacklistService.isTokenBlacklisted(token)) {
+                PrintWriter writer = response.getWriter();
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                writer.print("Token is blacklisted, please log in again");
+                return;
+            }
+
+            if (jwtUtil.isExpired(token)) {
+                PrintWriter writer = response.getWriter();
+                writer.print("Access Token expired");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
+            // Check if this token is Access token
+            if (!jwtUtil.getCategory(token).equals("access")) {
+                PrintWriter writer = response.getWriter();
+                writer.print("Invalid token category");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
+            // Get username, role from token
+            String username = jwtUtil.getUsername(token);
+            String role = jwtUtil.getRole(token);
+
+            // userEntity
+            UserEntity userEntity = UserEntity.builder()
+                    .username(username)
+                    .role(role)
+                    .password(null)
+                    .build();
+
+            // UserDetails
+            CustomUserDetails customUserDetails = new CustomUserDetails(userEntity);
+
+            // Auth
+            Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            filterChain.doFilter(request, response);
+        } catch (ExpiredJwtException e){
+            response.setContentType("application/json;charset=UTF-8");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            writer.print("Token is blacklisted, please log in again");
-            return;
-        }
-
-        if (jwtUtil.isExpired(token)) {
             PrintWriter writer = response.getWriter();
-            writer.print("Access Token expired");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+            writer.print("{\"error\":\"Token expired\",\"message\":\"" + e.getMessage() + "\"}");
         }
-
-        // Check if this token is Access token
-        if (!jwtUtil.getCategory(token).equals("access")) {
-            PrintWriter writer = response.getWriter();
-            writer.print("Invalid token category");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
-        // Get username, role from token
-        String username = jwtUtil.getUsername(token);
-        String role = jwtUtil.getRole(token);
-
-        // userEntity
-        UserEntity userEntity = UserEntity.builder()
-                .username(username)
-                .role(role)
-                .password(null)
-                .build();
-
-        // UserDetails
-        CustomUserDetails customUserDetails = new CustomUserDetails(userEntity);
-
-        // Auth
-        Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-
-        filterChain.doFilter(request, response);
     }
 }
