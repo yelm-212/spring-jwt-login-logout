@@ -4,25 +4,32 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yelm.jwtlogin.blacklist.TokenBlacklistService;
 import com.yelm.jwtlogin.jwt.*;
 import com.yelm.jwtlogin.user.service.CustomUserDetailsSerivce;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -83,6 +90,13 @@ public class SecurityConfig {
         http
                 .httpBasic((auth) -> auth.disable());
 
+        // customized authentication entry point & access denied handler
+        http
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint()) // 인증 실패 시 401 반환
+                        .accessDeniedHandler(new CustomAccessDeniedHandler())); // 권한 부족 시 403 반환
+
+
         // Authenticate
         http
                 .authorizeHttpRequests((auth) -> auth
@@ -116,6 +130,24 @@ public class SecurityConfig {
 
 
         return http.build();
+    }
+
+    // 401 반환하는 AuthenticationEntryPoint
+    public static class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+        @Override
+        public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
+                throws IOException {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Authentication is required");
+        }
+    }
+
+    // 403 반환하는 AccessDeniedHandler
+    public static class CustomAccessDeniedHandler implements AccessDeniedHandler {
+        @Override
+        public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException)
+                throws IOException {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden: Access is denied");
+        }
     }
 
     @Bean
