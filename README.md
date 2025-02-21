@@ -152,9 +152,7 @@ This command iterates through keys matching the pattern blacklist:*, retrieving 
 
 ## TODO
 
-- [x] Verify CORS configuration with Frontend (Vue.js)
-- [x] Implement token refresh mechanism
-- [x] Implement logout mechanism
+- [ ] Test with JMeter or JMT
 
 ## API Endpoints
 
