@@ -153,6 +153,8 @@ This command iterates through keys matching the pattern blacklist:*, retrieving 
 ## TODO
 
 - [ ] Test with JMeter or JMT
+- [ ] Deploy server & client
+    - [ ] CI & CD Implementation
 
 ## API Endpoints
 
