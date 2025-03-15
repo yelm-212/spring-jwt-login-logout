@@ -53,7 +53,7 @@ graph TD
    A -->|Logout Request| K[Logout Request]
 
    A -->|Protected API Request| F[JWTFilter]
-   F -->|Check Blacklist| J[(Redis)]
+   F -->|Check Blacklist| J[(Cache)]
    J -->|Returns Blacklisted token| F
    F -->|Allow or Deny| G[Protected Resource]
 
@@ -75,7 +75,7 @@ graph TD
 7. `JWTFilter` validates the Access Token for protected endpoints.
 8. If the Access Token is expired or client sends reissue request:
     - The client sends a reissue request with the Refresh Token (HttpOnly Cookie).
-    - `TokenBlacklistService` validates the Refresh Token using Redis.
+    - `TokenBlacklistService` validates the Refresh Token using Cache - Redis or local cache -.
     - If the Refresh Token is valid:
         - A new Access Token is issued.
         - A new Refresh Token is issued and stored.
@@ -152,9 +152,9 @@ This command iterates through keys matching the pattern blacklist:*, retrieving 
 
 ## TODO
 
-- [x] Verify CORS configuration with Frontend (Vue.js)
-- [x] Implement token refresh mechanism
-- [x] Implement logout mechanism
+- [ ] Test with JMeter or JMT
+- [ ] Deploy server & client
+    - [ ] CI & CD Implementation
 
 ## API Endpoints
 
